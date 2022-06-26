@@ -1,2 +1,2 @@
 # Automate-AWS-Lambda-Layer-Creation-with-Python
-A Python function and a shell script to create AWS Lambda layer package.
+A Python function and a shell script to create AWS Lambda layer package. Read details in the blog: https://www.poeticdev.com/automate-aws-lambda-layer-creation-with-python-and-shell-scripts/ 
