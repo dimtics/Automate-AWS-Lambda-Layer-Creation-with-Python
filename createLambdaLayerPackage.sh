@@ -4,7 +4,7 @@
 #### Author: Dimeji Salau
 #### Arguments:
 ####    pythonVersion: string => Python runtime version e.g "3.9"
-####    layerModule: string => Python library to be added to the layer. 
+####    layerModule: string => Python library to be included in the Lambda layer package. 
 ####                  Separate multiple libraries with spaces e.g. "pandas pyarrow" within a single string construct
 ####    packageName: string => A name for the final zip layer package.
 ####
@@ -36,14 +36,13 @@ mkdir $projectDir
 # get into the project directory
 cd $projectDir
 
-# create a path for libraries to include the layer
+# create a path for libraries to be added to the layer
 mkdir -p build/python/lib/python$pythonVersion/site-packages
 
 # install desired libraries
 pip install $layerModule -t build/python/lib/python$pythonVersion/site-packages
 
-# consider removing unnecessary files and folders such as __pycache__, LICENSES, etc.
-# to reduce the size of the package
+# consider removing unnecessary files and folders such as __pycache__, LICENSES, etc. to reduce package size
 find build/python/lib/python$pythonVersion/site-packages -type d -name "__pycache__" -exec rm -rf {} \;
 find build/python/lib/python$pythonVersion/site-packages -type f -name "*LICENSE*" -exec rm -rf {} \;
 
