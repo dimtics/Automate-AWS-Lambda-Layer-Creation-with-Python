@@ -39,8 +39,7 @@ def getParser():
     return args
 
 
-def createLambdaLayerPackage():
-
+def createLambdaLayerPackage(myArgs: argparse.Namespace) -> None:
     """ A function to create an AWS Lambda layer package
     Args:
         --runtime-version (str): Python version to use for the Lambda layer e.g. 3.7
@@ -54,11 +53,8 @@ def createLambdaLayerPackage():
     """
 
     try:
-        # call argparse function to get the arguments
-        modArgs = getParser()
-
         # get a dict of arguments and values
-        mydict = vars(modArgs)
+        mydict = vars(myArgs)
 
         # extract values from arguments
         modList = mydict["layer_library"]
@@ -154,9 +150,11 @@ def createLambdaLayerPackage():
 
 
 def main():
-    createLambdaLayerPackage()
+    # get the required arguments
+    modArgs = getParser()
+    # create the lambda layer
+    createLambdaLayerPackage(modArgs)
 
 
 if __name__ == "__main__":
     main()
-
