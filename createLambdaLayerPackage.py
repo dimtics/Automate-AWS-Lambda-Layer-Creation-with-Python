@@ -127,7 +127,6 @@ def createLambdaLayerPackage(myArgs: argparse.Namespace) -> None:
 
             # remove the build folder
             rm -rf build
-
             """
 
         # run the shell script
@@ -152,6 +151,7 @@ def createLambdaLayerPackage(myArgs: argparse.Namespace) -> None:
 def main():
     # get the required arguments
     modArgs = getParser()
+
     # create the lambda layer
     createLambdaLayerPackage(modArgs)
 
