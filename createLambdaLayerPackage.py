@@ -23,7 +23,7 @@ def getParser():
         "--runtime-version",
         required=True,
         type=str,
-        help="Python version to use for the Lambda layer e.g. 3.7",
+        help="Python version to use for the Lambda layer e.g. 3.12",
     )
 
     parser.add_argument(
@@ -42,14 +42,14 @@ def getParser():
 def createLambdaLayerPackage(myArgs: argparse.Namespace) -> None:
     """ A function to create an AWS Lambda layer package
     Args:
-        --runtime-version (str): Python version to use for the Lambda layer e.g. 3.7
+        --runtime-version (str): Python version to use for the Lambda layer e.g. 3.12
         --layer-library" (str): Python libraries to be included in the Lambda layer package.
         --layer-package-name (str): Name of the package zip file.
 
     Returns:
         A zip layer package/file under projectLambdaLayer directory.
 
-    Usage: createLambdaLayerPackage.py --layer-package-name pandas-pyarrow-layer --runtime-version 3.9 --layer-library pandas pyarrow    
+    Usage: createLambdaLayerPackage.py --layer-package-name polars-pyarrow-layer --runtime-version 3.12 --layer-library polars pyarrow
     """
 
     try:
@@ -76,48 +76,39 @@ def createLambdaLayerPackage(myArgs: argparse.Namespace) -> None:
             # create a new conda environment with python version desired
             conda create --name $pyLayerEnv python=$pythonVersion --yes
 
-            # configure conda to avoid CommandNotFoundError 
+            # configure conda to avoid CommandNotFoundError
             source ~/$condaBase/etc/profile.d/conda.sh
 
             # activate the conda environment
             conda activate $pyLayerEnv
 
-            # create a project directory
-            mkdir $projectDir
+            # create a project directory and navigate into the folder
+            mkdir $projectDir && cd $projectDir
 
-            # get into the project directory
-            cd $projectDir
-
-            # create a path for libraries to be added to the layer
+            # create a package path for libraries to be included in the layer
             mkdir -p build/python/lib/python$pythonVersion/site-packages
 
             # create an array to store libraries
             declare -a libArr
 
-            # Add libraries to array
+            # add libraries to array
             libArr+=({modStr})
 
             # install libraries in the array to the defined path
             for item in "${{libArr[@]}}"
-                do 
-                    pip install "$item" -t build/python/lib/python$pythonVersion/site-packages
-                done    
+                do
+                    pip install --platform manylinux2014_x86_64 "$item" -t build/python/lib/python$pythonVersion/site-packages
+                done
 
             # consider removing unnecessary files and folders such as __pycache__, LICENSES, etc. to reduce package size
             find build/python/lib/python$pythonVersion/site-packages -type d -name "__pycache__" -exec rm -rf {{}} \;
             find build/python/lib/python$pythonVersion/site-packages -type f -name "*LICENSE*" -exec rm -rf {{}} \;
 
-            # get into the build directory
-            cd build
+            # change to build directory and zip the installed libraries
+            cd build && zip -r $packageName python
 
-            # zip the installed libraries within the build folder and name the zip file
-            zip -r $packageName python
-
-            # deactivate the conda environment
-            conda deactivate
-
-            # remove the conda environment
-            conda remove --name $pyLayerEnv --all --yes
+            # deactivate and remove the conda environment
+            conda deactivate && conda remove --name $pyLayerEnv --all --yes
 
             # move the zip layer package under the project directory
             mv $packageName.zip ../
